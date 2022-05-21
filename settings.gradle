@@ -1,0 +1,2 @@
+rootProject.name = "digital-ink-recognition-and-ocr"
+include ':app'

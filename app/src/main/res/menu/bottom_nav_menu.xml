@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/about"
+        android:title="about"
+        app:showAsAction="never"
+        />
+
+    <!-- for toggling snackbar -->
+    <item
+        android:id="@+id/toggle_snackbar"
+        android:title="turn snackbar off"
+        app:showAsAction="never"
+        />
+
+    <!-- for toggling pinyin/definition fetch -->
+    <item
+        android:id="@+id/toggle_pinyin_definition_fetch"
+        android:title="get pinyin: on"
+        app:showAsAction="never"
+        />
+
+    <!-- for toggling copying character to clipboard -->
+    <item
+        android:id="@+id/copy_char_to_clipboard"
+        android:title="copy to clipboard: on"
+        app:showAsAction="never"
+        />
+
+    <item
+        android:id="@+id/clear_canvas"
+        android:icon="@drawable/outline_clear_24"
+        android:title="clear canvas"
+        app:showAsAction="ifRoom"
+        />
+
+</menu>

@@ -1,0 +1,8 @@
+mobile app project to help id chinese characters via digital ink recognition and OCR with ML Kit
+
+https://developers.google.com/ml-kit/vision/digital-ink-recognition/android
+https://developers.google.com/ml-kit/vision/text-recognition/v2/android
+
+https://developer.android.com/codelabs/advanced-android-kotlin-training-canvas#0
+https://kotlinlang.org/docs/properties.html#late-initialized-properties-and-variables
+https://stackoverflow.com/questions/3823799/android-how-does-bitmap-recycle-work
