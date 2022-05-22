@@ -94,7 +94,10 @@ class MainActivity : AppCompatActivity() {
                             Log.d("DEBUG", doc.title())
 
                             val pinyinResults = doc.select(".form-of") as Elements
-                            pinyin = pinyinResults[0].text()
+
+                            if(pinyinResults.count() > 0) {
+                                pinyin = pinyinResults[0].text()
+                            }
                         } catch (err: HttpStatusException) {
                         }
                         showPopup("best match: $res\npinyin: $pinyin")
