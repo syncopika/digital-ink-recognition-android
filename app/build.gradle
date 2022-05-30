@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.digital_ink_recognition_and_ocr"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"

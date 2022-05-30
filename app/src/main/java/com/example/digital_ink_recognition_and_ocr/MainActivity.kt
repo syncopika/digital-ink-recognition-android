@@ -2,12 +2,14 @@ package com.example.digital_ink_recognition_and_ocr
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
@@ -57,12 +59,30 @@ class MainActivity : AppCompatActivity() {
     // https://stackoverflow.com/questions/43680655/snackbar-sometimes-doesnt-show-up-when-it-replaces-another-one
     private var currSnackbar : Snackbar? = null
 
-    private fun showSnackbar(msgId: Int){
+    private fun showSnackbar(msgId: Int) {
         if(snackbarOn) {
             val snackbar = Snackbar.make(binding.container, msgId, Snackbar.LENGTH_INDEFINITE)
             snackbar.show()
             currSnackbar = snackbar
         }
+    }
+
+    // https://stackoverflow.com/questions/51141970/check-internet-connectivity-android-in-kotlin
+    private fun isConnectedToInternet(): Boolean {
+        val connManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (connManager != null) {
+            val netCapabilities = connManager.getNetworkCapabilities(connManager.activeNetwork)
+            if(netCapabilities != null){
+                if(netCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)){
+                    return true;
+                }else if(netCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)){
+                    return true;
+                }else if(netCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)){
+                    return true;
+                }
+            }
+        }
+        return false
     }
 
     private fun doInkRecognition(model: DigitalInkRecognitionModel, inkData: Ink){
@@ -84,33 +104,45 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     // what if multiple definitions/pinyin?
                     // try a different source like chinese-tools?
-                    if(fetchPinyinOn) {
-                        var pinyin = ""
-                        try {
-                            val doc = withContext(Dispatchers.IO) {
-                                Jsoup.connect("https://en.wiktionary.org/wiki/$res")
-                                    .get() as Document
-                            }
-                            Log.d("DEBUG", doc.title())
 
-                            val pinyinResults = doc.select(".form-of") as Elements
-
-                            if(pinyinResults.count() > 0) {
-                                pinyin = pinyinResults[0].text()
-                            }
-                        } catch (err: HttpStatusException) {
-                        }
-                        showPopup("best match: $res\npinyin: $pinyin")
-                    }else{
+                    // make sure internet is available before trying to get pinyin
+                    val isConnectedToInternet = isConnectedToInternet()
+                    if (!isConnectedToInternet) {
                         showPopup("best match: $res")
-                    }
+                        if (fetchPinyinOn){
+                            showSnackbar(R.string.failure_msg_pinyin)
+                        } else {
+                            currSnackbar?.dismiss()
+                        }
+                    } else {
+                        if (fetchPinyinOn) {
+                            var pinyin = ""
+                            try {
+                                val doc = withContext(Dispatchers.IO) {
+                                    Jsoup.connect("https://en.wiktionary.org/wiki/$res")
+                                        .get() as Document
+                                }
+                                Log.d("DEBUG", doc.title())
 
-                    currSnackbar?.dismiss()
+                                val pinyinResults = doc.select(".form-of") as Elements
+
+                                if (pinyinResults.count() > 0) {
+                                    pinyin = pinyinResults[0].text()
+                                }
+                            } catch (err: HttpStatusException) {
+                            }
+                            showPopup("best match: $res\npinyin: $pinyin")
+                        } else {
+                            showPopup("best match: $res")
+                        }
+
+                        currSnackbar?.dismiss()
+                    }
                 }
 
                 // add the matching character to clipboard for pasting somewhere if needed
                 // https://stackoverflow.com/questions/19253786/how-to-copy-text-to-clip-board-in-android
-                if(copyCharToClipboard) {
+                if (copyCharToClipboard) {
                     val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                     val clip = ClipData.newPlainText("", res) as ClipData
                     clipboard.setPrimaryClip(clip)
@@ -122,7 +154,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private suspend fun getAndProcessInkData(){
+    private suspend fun getAndProcessInkData() {
         showSnackbar(R.string.starting_msg)
 
         withContext(Dispatchers.Default) {
@@ -138,8 +170,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (modelIdentifier != null) {
-                var model: DigitalInkRecognitionModel =
-                    DigitalInkRecognitionModel.builder(modelIdentifier).build()
+                val model: DigitalInkRecognitionModel = DigitalInkRecognitionModel.builder(modelIdentifier).build()
                 val remoteModelManager = RemoteModelManager.getInstance()
 
                 showSnackbar(R.string.check_download_language_msg)
@@ -174,7 +205,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showPopup(text: String?){
+    private fun showPopup(text: String?) {
         // https://stackoverflow.com/questions/5944987/how-to-create-a-popup-window-popupwindow-in-android
         val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = inflater.inflate(R.layout.popup_window, null)
@@ -186,16 +217,16 @@ class MainActivity : AppCompatActivity() {
         )
 
         val popupText = popupView.findViewById(R.id.popup_text) as TextView
-        if(text != null) popupText.text = text
+        if (text != null) popupText.text = text
 
         popupText.setTextColor(Color.BLACK)
 
         popupWindow.showAtLocation(binding.root, Gravity.TOP, 0, 0)
 
-        popupView.setOnTouchListener(View.OnTouchListener { view, event ->
+        popupView.setOnTouchListener { _, _ ->
             popupWindow.dismiss()
             true
-        })
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -214,7 +245,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val fab = binding.container.findViewById(R.id.analyze_drawing) as FloatingActionButton
-        fab.setOnClickListener { _ ->
+        fab.setOnClickListener {
             // https://stackoverflow.com/questions/49433721/how-to-showpopupwindow-after-asynctask-finished
             // https://developer.android.com/kotlin/coroutines#use-coroutines-for-main-safety
             // https://developer.android.com/kotlin/coroutines/coroutines-adv#main-safety

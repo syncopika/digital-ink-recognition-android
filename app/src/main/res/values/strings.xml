@@ -11,4 +11,5 @@
     <string name="failure_msg">Uh oh, something went wrong :(.</string>
     <string name="failure_msg_recognition">Uh oh, something went wrong with recognition :(.</string>
     <string name="failure_msg_download">Uh oh, something went wrong :(. are you connected to the internet?</string>
+    <string name="failure_msg_pinyin">couldn\'t get pinyin - are you connected to the internet?</string>
 </resources>
