@@ -111,7 +111,8 @@ class CanvasView: View {
 
     public fun clear(){
         // https://stackoverflow.com/questions/30485073/clear-bitmap-in-android
-        extraBitmap.eraseColor(Color.TRANSPARENT)
+        // on Android 13 (pixel 6a), Color.TRANSPARENT gives a black screen but Color.WHITE works well anyway.
+        extraBitmap.eraseColor(Color.WHITE)
         inkBuilder = Ink.Builder()
         invalidate()
     }
