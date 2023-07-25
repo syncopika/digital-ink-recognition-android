@@ -8,13 +8,11 @@ dependencies:
 - [jsoup](https://github.com/jhy/jsoup/)
     
 some screenshots:    
-![screenshot of app processing](screenshots/Screenshot_20220520-204434.jpg)    
-After writing out a character and pressing the middle button (known as a floating action button or FAB), processing will start. When the app is run for the first time it'll be a bit slow.    
-    
-![screenshot of app result](screenshots/Screenshot_20220520-204506.jpg)    
+![screenshot of app after processing](screenshots/Screenshot_20230724-200148.jpg)    
+After writing out a character and pressing the middle button (known as a floating action button or FAB), processing will start. When the app is run for the first time it might be a bit slow.    
 Here's what a typical result should look like after processing. The pinyin information is fetched using jsoup.
     
-![screenshot of options menu](screenshots/Screenshot_20220520-204517.jpg)    
+![screenshot of options menu](screenshots/Screenshot_20230724-201556.jpg)    
 This shows the options for togglable features I have currently.    
     
     
