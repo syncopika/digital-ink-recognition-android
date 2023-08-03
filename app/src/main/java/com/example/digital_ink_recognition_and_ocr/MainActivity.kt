@@ -10,9 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -50,17 +48,22 @@ import org.jsoup.HttpStatusException
 
 class MainActivity : AppCompatActivity() {
 
+    enum class ChineseCharacterSet {
+        TRADITIONAL, SIMPLIFIED,
+    }
+
     private lateinit var binding: ActivityMainBinding
 
     private var snackbarOn : Boolean = true
     private var fetchPinyinOn: Boolean = true
     private var copyCharToClipboard: Boolean = true
+    private var selectedChineseCharacterSet: ChineseCharacterSet = ChineseCharacterSet.TRADITIONAL
 
     // https://stackoverflow.com/questions/43680655/snackbar-sometimes-doesnt-show-up-when-it-replaces-another-one
     private var currSnackbar : Snackbar? = null
 
     private fun showSnackbar(msgId: Int) {
-        if(snackbarOn) {
+        if (snackbarOn) {
             val snackbar = Snackbar.make(binding.container, msgId, Snackbar.LENGTH_INDEFINITE)
             snackbar.show()
             currSnackbar = snackbar
@@ -72,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         val connManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (connManager != null) {
             val netCapabilities = connManager.getNetworkCapabilities(connManager.activeNetwork)
-            if(netCapabilities != null){
+            if (netCapabilities != null) {
                 if(netCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)){
                     return true;
                 }else if(netCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)){
@@ -163,8 +166,11 @@ class MainActivity : AppCompatActivity() {
 
             var modelIdentifier: DigitalInkRecognitionModelIdentifier? = null
             try {
-                // traditional chinese
-                modelIdentifier = DigitalInkRecognitionModelIdentifier.fromLanguageTag("zh-TW")
+                if (selectedChineseCharacterSet == ChineseCharacterSet.TRADITIONAL) {
+                    modelIdentifier = DigitalInkRecognitionModelIdentifier.fromLanguageTag("zh-TW")
+                } else if (selectedChineseCharacterSet == ChineseCharacterSet.SIMPLIFIED) {
+                    modelIdentifier = DigitalInkRecognitionModelIdentifier.fromLanguageTag("zh-CN")
+                }
             } catch (e: MlKitException) {
                 // language tag failed to parse, handle error.
             }
@@ -199,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-            }else{
+            } else {
                 // no model was found, handle error.
             }
         }
@@ -229,6 +235,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun handleLanguageSelectRadioBtnClick(view: android.view.View) {
+        if (view is RadioButton) {
+            val checked = view.isChecked
+
+            when (view.getId()) {
+                R.id.traditionalChineseSelected ->
+                    if (checked) {
+                        selectedChineseCharacterSet = ChineseCharacterSet.TRADITIONAL
+                    }
+                R.id.simplifiedChineseSelected ->
+                    if (checked) {
+                        selectedChineseCharacterSet = ChineseCharacterSet.SIMPLIFIED
+                    }
+            }
+        }
+    }
+
+    private fun showLanguageSelect() {
+        val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val popupView = inflater.inflate(R.layout.lang_select_window, null)
+        val popupWindow = PopupWindow(
+            popupView,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            true // focusable - allows closing of the popup when tapping outside of it
+        )
+
+        val selectLangRadioGroup = popupView.findViewById(R.id.langSelectRadioGroup) as RadioGroup
+        if (selectedChineseCharacterSet == ChineseCharacterSet.TRADITIONAL) {
+            selectLangRadioGroup.check(R.id.traditionalChineseSelected)
+        } else if (selectedChineseCharacterSet == ChineseCharacterSet.SIMPLIFIED) {
+            selectLangRadioGroup.check(R.id.simplifiedChineseSelected)
+        }
+
+        popupWindow.showAtLocation(binding.root, Gravity.TOP, 0, 0)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -240,8 +283,10 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomAppBar = binding.navView
 
         navView.setNavigationOnClickListener {
-            // TODO: handle navigation icon press
-            // switch between OCR and digital-ink recognition here?
+            // TODO: switch between OCR and digital-ink recognition here?
+
+            // allow switching language models here
+            showLanguageSelect()
         }
 
         val fab = binding.container.findViewById(R.id.analyze_drawing) as FloatingActionButton
