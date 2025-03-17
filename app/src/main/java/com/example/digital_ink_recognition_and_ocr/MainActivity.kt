@@ -124,10 +124,14 @@ class MainActivity : AppCompatActivity() {
                                 }
                                 Log.d("DEBUG", doc.title())
 
-                                val pinyinResults = doc.select(".form-of") as Elements
+                                val pinyinResults = doc.select(".zhpron-monospace") as Elements // these should be <span> elements
 
-                                if (pinyinResults.count() > 0) {
-                                    pinyin = pinyinResults[0].text()
+                                if (pinyinResults.isNotEmpty()) {
+                                    // there should be an <a> element within each <span>
+                                    val anchorEl = pinyinResults[0].children()
+                                    if (anchorEl.isNotEmpty()) {
+                                        pinyin = anchorEl[0].text()
+                                    }
                                 }
                             } catch (err: HttpStatusException) {
                             }
