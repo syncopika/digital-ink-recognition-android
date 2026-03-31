@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 34
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.example.digital_ink_recognition_and_ocr"
-        minSdkVersion 23
-        targetSdkVersion 31
+        minSdkVersion 24
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
 
@@ -38,6 +38,7 @@ android {
         pickFirst 'mozilla/public-suffix-list.txt'
         pickFirst 'META-INF/DEPENDENCIES'
     }
+    namespace 'com.example.digital_ink_recognition_and_ocr'
 }
 
 dependencies {
@@ -49,7 +50,7 @@ dependencies {
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.0'
-    implementation 'com.google.mlkit:digital-ink-recognition:18.0.0'
+    implementation 'com.google.mlkit:digital-ink-recognition:19.0.0'
     implementation 'org.jsoup:jsoup:1.15.1'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
